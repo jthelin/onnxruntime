@@ -3,6 +3,9 @@ set -e
 
 SYS_LONG_BIT=$(getconf LONG_BIT)
 
+# Get the directory path of this script.
+CMD_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 echo "Installing azcopy"
 if [ $SYS_LONG_BIT = "64" ]; then
   mkdir -p /tmp/azcopy
@@ -28,7 +31,7 @@ fi
 if [ "$INSTALLED_PYTHON_VERSION" = "3.4" ];then
   echo "Python 3.5 and above is needed for running onnx tests!" 1>&2
 else
-  source /tmp/scripts/install_onnx.sh $INSTALLED_PYTHON_VERSION
+  source "${CMD_HOME}/install_onnx.sh" $INSTALLED_PYTHON_VERSION
 fi
 
 #The last onnx version will be kept
