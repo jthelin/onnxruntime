@@ -1,0 +1,40 @@
+#-------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+#--------------------------------------------------------------------------
+# Official user quickstart docker container for ONNX Runtime CPU
+# Ubuntu 16.04, CPU version, Python 3.
+#--------------------------------------------------------------------------
+
+FROM ubuntu:16.04 AS minimal
+MAINTAINER Jorgen Thelin "jthelin@microsoft.com"
+
+FROM ubuntu:16.04 AS build
+ARG PYTHON_VERSION=3.5
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && \
+    apt-get install -y sudo git bash
+
+ENV PATH="/opt/cmake/bin:${PATH}"
+
+# Copy install scripts
+ADD ./tools/ci_build/github/linux/docker/scripts/ /tmp/scripts/
+RUN /tmp/scripts/install_ubuntu.sh -p ${PYTHON_VERSION} && \
+    /tmp/scripts/install_deps.sh
+
+COPY . /onnxruntime/
+WORKDIR /onnxruntime/build
+RUN python3 /onnxruntime/tools/ci_build/build.py \
+    --build_dir /onnxruntime/build \
+    --config Release \
+    --build_server \
+    --skip_submodule_sync
+
+FROM minimal AS final
+WORKDIR /onnxruntime/server/
+ENV MODEL_ABSOLUTE_PATH /onnxruntime/model/model.onnx
+COPY --from=build /onnxruntime/build/Release/onnxruntime_server /onnxruntime/server/
+RUN apt-get update \
+    && apt-get install -y libgomp1
+ENTRYPOINT /onnxruntime/server/onnxruntime_server --model_path $MODEL_ABSOLUTE_PATH
