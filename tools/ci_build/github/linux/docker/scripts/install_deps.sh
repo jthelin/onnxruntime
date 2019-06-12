@@ -8,7 +8,7 @@ SYS_LONG_BIT=$(getconf LONG_BIT)
 CMD_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "Installing azcopy"
-if [ $SYS_LONG_BIT = "64" ]; then
+if [ "$SYS_LONG_BIT" = "64" ]; then
   mkdir -p /tmp/azcopy
   aria2c -q -d /tmp/azcopy -o azcopy.tar.gz https://aka.ms/downloadazcopy-v10-linux
   tar --strip 1 -xf /tmp/azcopy/azcopy.tar.gz -C /tmp/azcopy
@@ -19,8 +19,9 @@ mkdir -p /tmp/src
 aria2c -q -d /tmp/src https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2.tar.gz
 tar -xf /tmp/src/cmake-3.13.2.tar.gz -C /tmp/src
 cd /tmp/src/cmake-3.13.2
-./configure --prefix=/usr --parallel=`nproc` --system-curl --system-zlib --system-expat
-make -j`nproc`
+NUM_PROCESSORS=$(nproc)
+./configure --prefix=/usr "--parallel=${NUM_PROCESSORS}" --system-curl --system-zlib --system-expat
+make "-j${NUM_PROCESSORS}"
 make install
 
 #install onnx
