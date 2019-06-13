@@ -4,6 +4,7 @@ set -e
 SYS_LONG_BIT=$(getconf LONG_BIT)
 
 # Get the directory path of this script.
+# https://stackoverflow.com/questions/59895/get-the-source-directory-of-a-bash-script-from-within-the-script-itself
 CMD_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "Installing azcopy"
